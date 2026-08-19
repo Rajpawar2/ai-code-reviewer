@@ -17,6 +17,16 @@ class Settings(BaseSettings):
         description="Database connection URL",
     )
 
+    @property
+    def normalized_database_url(self) -> str:
+        """Normalizes standard postgres:// or postgresql:// URLs (e.g. from Render) to postgresql+psycopg://."""
+        url = self.DATABASE_URL.strip()
+        if url.startswith("postgres://"):
+            return "postgresql+psycopg://" + url[len("postgres://"):]
+        elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+            return "postgresql+psycopg://" + url[len("postgresql://"):]
+        return url
+
     # Security & Auth
     SECRET_KEY: str = "super_secret_jwt_key_change_in_production_development_key_12345"
     ALGORITHM: str = "HS256"
@@ -34,13 +44,20 @@ class Settings(BaseSettings):
     MAX_REPO_TOTAL_SIZE_KB: int = 10000  # 10MB
     MAX_SINGLE_FILE_SIZE_KB: int = 500  # 500KB
 
-    # CORS
+    # Frontend URL & CORS
+    FRONTEND_URL: str = "http://localhost:5173"
     CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://localhost:8000",
     ]
+
+    def get_cors_origins(self) -> List[str]:
+        origins = list(self.CORS_ORIGINS)
+        if self.FRONTEND_URL and self.FRONTEND_URL not in origins:
+            origins.append(self.FRONTEND_URL.rstrip("/"))
+        return origins
 
 
 settings = Settings()
