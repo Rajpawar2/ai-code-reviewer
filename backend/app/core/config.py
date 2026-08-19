@@ -1,0 +1,46 @@
+from typing import List
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    PROJECT_NAME: str = "AI Code Review & Debugging Assistant"
+    API_V1_PREFIX: str = "/api"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = True
+
+    # Database
+    DATABASE_URL: str = Field(
+        default="postgresql+psycopg://postgres:postgres@localhost:5432/code_reviewer",
+        description="Database connection URL",
+    )
+
+    # Security & Auth
+    SECRET_KEY: str = "super_secret_jwt_key_change_in_production_development_key_12345"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+
+    # AI Configuration
+    AI_PROVIDER: str = "ollama"  # "ollama" or "mock"
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "qwen2.5-coder:7b"
+    OLLAMA_TIMEOUT_SECONDS: float = 90.0
+
+    # GitHub Service Limits
+    GITHUB_TOKEN: str = ""
+    MAX_REPO_FILES: int = 40
+    MAX_REPO_TOTAL_SIZE_KB: int = 10000  # 10MB
+    MAX_SINGLE_FILE_SIZE_KB: int = 500  # 500KB
+
+    # CORS
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8000",
+    ]
+
+
+settings = Settings()
